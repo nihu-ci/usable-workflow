@@ -35,6 +35,6 @@ jobs:
       run: echo "dependency scan successful"
     - name: Build image
       run: |
-        docker build -t ${acc_id}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.project }}/${{ inputs.component }}:$appVersion
+        docker build -t ${acc_id}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.project }}/${{ inputs.component }}:$appVersion .
         docker images
       
