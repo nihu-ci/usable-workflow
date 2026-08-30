@@ -22,6 +22,6 @@ jobs:
     # $GUTHUB_OUTPUT: Commit id available in all jobs.
     - name: Get app version
       run: |
-        echo "appVersion=${GITHUB_SHA::9} >> $GITHUB_ENV
+        echo "appVersion=${GITHUB_SHA::9}" >> $GITHUB_ENV
         echo $appVersion
       
