@@ -12,27 +12,46 @@ on: # type of event to trigger workflow
         type: string
         required: false
         default: ""
+
 env:
   acc_id: 406682759639
+
+permissions:
+  contents: read
+  statuses: write
+
 jobs:
   nodejs:  # name of the job
     runs-on: nodejs  #the workflow runs on nodejs runner
     steps:
     - name: Get code  #git clone the current repo
       uses: actions/checkout@v7
+
     # $GITHUB_ENV: commit id available to subsequent steps in same job
     # $GUTHUB_OUTPUT: Commit id available in all jobs.
     - name: Get app version
       run: |
         echo "appVersion=${GITHUB_SHA::9}" >> $GITHUB_ENV
-    - name: list files
-      run: ls -l
+
     - name: Install dependencies
       run: npm install
+
     - name: Run unit tests
+      id: unit_tests
       run: echo "Unit test successful"
+
+    - name: Update unit test status
+      if: always()
+      uses: nihu-ci/usable-workflow/.github/actions@main
+      with:
+        context: UNIT_TESTS
+        sha: ${{ github.sha }}
+        description: "Unit test ${{ steps.unit_test.outcome }}"
+        state: ${{ steps.unit_tests.outcome }}
+
     - name: Scan dependencies
       run: echo "dependency scan successful"
+
     - name: Build image
       run: |
         docker build -t ${acc_id}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.project }}/${{ inputs.component }}:$appVersion .

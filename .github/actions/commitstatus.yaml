@@ -1,0 +1,34 @@
+name: Update commit status  # name of the action
+description: Update commit status using GitHub status API
+
+inputs:
+  context:
+    description: status context
+    required: true
+  state:
+    description:
+    required: true
+  sha:
+    description: commit id
+    required: true
+  description:
+    description: status description
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Update commit status
+      shell: bash
+      run: |
+        curl -X POST \
+          -H "Authorization: Bearer ${{ github.token }}" \
+          -H "Content-Type: application/json" \
+          --data "{
+            \"state\": \"${{ inputs.state }}\",
+            \"context\": \"${{ inputs.context }}\",
+            \"description\": \"${{ inputs.description }}\"
+          }" \
+          "https://api.github.com/repos/${{ github.repository }}/statuses/${{ inputs.sha }}"
+
