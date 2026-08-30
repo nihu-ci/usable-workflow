@@ -23,5 +23,6 @@ jobs:
     - name: Get app version
       run: |
         echo "appVersion=${GITHUB_SHA::9}" >> $GITHUB_ENV
-        echo $appVersion
+    - name: Print version
+      run:  echo $appVersion
       
