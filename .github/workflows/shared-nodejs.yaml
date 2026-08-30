@@ -25,6 +25,8 @@ jobs:
     - name: Get app version
       run: |
         echo "appVersion=${GITHUB_SHA::9}" >> $GITHUB_ENV
+    - name: list files
+      run: ls -l
     - name: Install dependencies
       run: npm install
     - name: Run unit tests
