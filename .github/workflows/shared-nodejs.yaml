@@ -1,0 +1,27 @@
+name: shared nodejs build #Name of the workflow
+on: # type of event to trigger workflow
+  workflow_call:  #this workflow is called by application workflow
+    inputs:  # Caller should supply below inputs
+      project: 
+        type: string
+        required: true
+      component:
+        type: string
+        required: true
+      description:
+        type: string
+        required: false
+        default: ""
+jobs:
+  nodejs:  # name of the job
+    runs-on: nodejs  #the workflow runs on nodejs runner
+    steps:
+    - name: Get code  #git clone the current repo
+      uses: actions/checkout@v7
+    # $GITHUB_ENV: commit id available to subsequent steps in same job
+    # $GUTHUB_OUTPUT: Commit id available in all jobs.
+    - name: Get app version
+      run: |
+        echo "appVersion=${GITHUB_SHA::9} >> $GITHUB_ENV
+        echo $appVersion
+      
