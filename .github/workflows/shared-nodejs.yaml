@@ -74,17 +74,17 @@ jobs:
           --scanners vuln \
           --severity HIGH,CRITICAL,MEDIUM \
           --pkg-types os \
-        #  --exit-code 1 \
+          --exit-code 0 \
           --format table \
           ${acc_id}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.project }}/${{ inputs.component }}:$appVersion
         TRIVY_RESULT=$?
-        echo "✅ Trivy scan passed without blocking issues."
-        # if [ "$TRIVY_RESULT" -ne 0 ]; then
-        #   echo "❌ Trivy found vulnerabilities (HIGH/CRITICAL/MEDIUM)"
-        #   exit 1
-        # fi
 
-        
+        if [ "$TRIVY_RESULT" -ne 0 ]; then
+          echo "❌ Trivy found vulnerabilities (HIGH/CRITICAL/MEDIUM)"
+          exit 1
+        fi
+
+        echo "✅ Trivy scan passed without blocking issues."
 
     - name: Update scan status
       if: always()  # Even if previous step fails, this should run.
