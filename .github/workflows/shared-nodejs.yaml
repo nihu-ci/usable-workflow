@@ -58,7 +58,7 @@ jobs:
       with:
         context: DEPENDENCY_CHECK
         sha: ${{ github.sha }}
-        description: "Unit test ${{ steps.depenency_check.outcome }}"
+        description: "depenency check ${{ steps.depenency_check.outcome }}"
         state: ${{ steps.depenency_check.outcome }}
       
     - name: Build image
@@ -72,6 +72,6 @@ jobs:
       with:
         context: BUILD_STATUS
         sha: ${{ github.sha }}
-        description: "Unit test ${{ steps.build_status.outcome }}"
+        description: "build status ${{ steps.build_status.outcome }}"
         state: ${{ steps.build_status.outcome }}
       
