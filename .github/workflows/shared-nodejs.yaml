@@ -46,7 +46,7 @@ jobs:
       with:
         context: UNIT_TESTS
         sha: ${{ github.sha }}
-        description: "Unit test ${{ steps.unit_test.outcome }}"
+        description: "Unit test ${{ steps.unit_tests.outcome }}"
         state: ${{ steps.unit_tests.outcome }}
 
     - name: Scan dependencies
