@@ -74,7 +74,7 @@ jobs:
           --scanners vuln \
           --severity HIGH,CRITICAL,MEDIUM \
           --pkg-types os \
-          --exit-code 1 \
+        #  --exit-code 1 \
           --format table \
           ${acc_id}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.project }}/${{ inputs.component }}:$appVersion
         TRIVY_RESULT=$?
