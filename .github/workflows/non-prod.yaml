@@ -19,17 +19,7 @@ jobs:
         appVersion=${short_sha::9}
         echo "appVersion=$appVersion" >> $GITHUB_ENV
 
-      - name: Compute short commit
-        id: commit
-        run: |
-          SHORT_SHA="${{ inputs.version }}"
-          APP_VERSION="${SHORT_SHA:0:9}"
-
-          echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
-          echo "App version: $APP_VERSION"
-          
-
-      - name: Check required commit statuses
+    - name: Check required commit statuses
         id: gate
         shell: bash
         run: |
