@@ -16,13 +16,13 @@ on: # type of event to trigger workflow
 env:
   acc_id: 406682759639
 
-permissions:
-  contents: read
-  statuses: write
 
 jobs:
   nodejs:  # name of the job
     runs-on: nodejs  #the workflow runs on nodejs runner
+    permissions:  # Controls what GITHUB token allowed to do for the job
+     contents: read
+     statuses: write
     steps:
     - name: Get code  #git clone the current repo
       uses: actions/checkout@v7
@@ -50,10 +50,28 @@ jobs:
         state: ${{ steps.unit_tests.outcome }}
 
     - name: Scan dependencies
+      id: depenency_check
       run: echo "dependency scan successful"
-
+    
+    - name: Update dependencies test status
+      uses: nihu-ci/usable-workflow/.github/actions@main
+      with:
+        context: DEPENDENCY_CHECK
+        sha: ${{ github.sha }}
+        description: "Unit test ${{ steps.depenency_check.outcome }}"
+        state: ${{ steps.depenency_check.outcome }}
+      
     - name: Build image
+      id: build_status
       run: |
         docker build -t ${acc_id}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.project }}/${{ inputs.component }}:$appVersion .
         docker images
+
+    - name: Update build status
+      uses: nihu-ci/usable-workflow/.github/actions@main
+      with:
+        context: BUILD_STATUS
+        sha: ${{ github.sha }}
+        description: "Unit test ${{ steps.build_status.outcome }}"
+        state: ${{ steps.build_status.outcome }}
       
