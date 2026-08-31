@@ -49,18 +49,6 @@ jobs:
         description: ${{ steps.unit_tests.outcome }}
         state: ${{ steps.unit_tests.outcome }}
 
-    - name: Scan dependencies
-      id: depenency_check
-      run: echo "dependency scan successful"
-    
-    - name: Update dependencies test status
-      uses: nihu-ci/usable-workflow/.github/actions@main
-      with:
-        context: SCANS
-        sha: ${{ github.sha }}
-        description: ${{ steps.depenency_check.outcome }}
-        state: ${{ steps.depenency_check.outcome }}
-      
     - name: Build image
       id: build_status
       run: |
@@ -74,4 +62,47 @@ jobs:
         sha: ${{ github.sha }}
         description: ${{ steps.build_status.outcome }}
         state: ${{ steps.build_status.outcome }}
-      
+
+    - name: Security Check (Dependabot + Trivy)
+      id: security_check
+      # env:
+      #   GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      shell: bash
+      run: |
+        echo "🔍 Running Trivy scan..."
+        trivy image \
+          --scanners vuln \
+          --severity HIGH,CRITICAL,MEDIUM \
+          --pkg-types os \
+          --exit-code 1 \
+          --format table \
+          ${ACC_ID}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.project }}/${{ inputs.component }}:$appVersion
+        TRIVY_RESULT=$?
+
+        if [ "$TRIVY_RESULT" -ne 0 ]; then
+          echo "❌ Trivy found vulnerabilities (HIGH/CRITICAL/MEDIUM)"
+          exit 1
+        fi
+
+        echo "✅ Trivy scan passed without blocking issues."
+
+    - name: Update scan status
+      if: always()  # Even if previous step fails, this should run.
+      uses: nihu-ci/usable-workflow/.github/actions@main
+      with:
+        context: SCANS
+        sha: ${{ github.sha }}
+        description: ${{ steps.security_check.outcome }}
+        state: ${{ steps.security_check.outcome }}    
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v5.1.1
+      with:
+        aws-region: us-east-1
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: push image
+      run: |
+        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${acc_id}.dkr.ecr.us-east-1.amazonaws.com
+        docker push ${acc_id}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.project }}/${{ inputs.component }}:$appVersion
