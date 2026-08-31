@@ -1,0 +1,60 @@
+name: non-prod workflow
+on:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+      environment:
+        required: false
+        type: string
+jobs:
+  non-prod:
+    runs-on: nodejs
+    steps: 
+    - name: compute commit
+      id: commit
+      run: |
+        short_sha=${{ inputs.version }}
+        appVersion=${short_sha::9}
+        echo "appVersion=$appVersion" >> $GITHUB_ENV
+
+    - name: Check commit statuses
+        run: |
+          echo "🔍 Checking commit statuses for ${{ inputs.version }}"
+          RESPONSE=$(curl -sS \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/commits/${{ inputs.version}}/status")
+
+          FAILED=0
+
+          for CONTEXT in DOCKER_BUILD UNIT_TESTS SCANS
+
+            STATUS=$(echo "$RESPONSE" | jq -r \
+              --arg context "$CONTEXT" \
+              '[.statuses[] | select(.context == $context)] | first | .state // empty')
+
+            if [ -z "$STATUS" ]; then
+              echo "❌ $CONTEXT: MISSING"
+              FAILED=1
+
+            elif [ "$STATUS" = "success" ]; then
+              echo "✅ $CONTEXT: SUCCESS"
+
+            else
+              echo "❌ $CONTEXT: $STATUS"
+              FAILED=1
+            fi
+
+          done
+
+          if [ "$FAILED" -eq 1 ]; then
+            echo "❌ Required commit statuses are not successful"
+            exit 1
+          fi
+
+          echo "✅ All required commit statuses are successful"
+    
+    
