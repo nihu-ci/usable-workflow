@@ -1,4 +1,4 @@
-name: non-prod workflow
+name: prod workflow
 on:
   workflow_call:
     inputs:
@@ -29,6 +29,7 @@ jobs:
             "DOCKER_BUILD"
             "UNIT_TESTS"
             "SCANS"
+            "UAT_DEPLOY"
           )
 
           RESPONSE=$(curl -s \
@@ -77,7 +78,7 @@ jobs:
           repository: nihu-ci/catalogue-deploy
 
     - name: deploy to ${{ inputs.environment }} cluster
-      id: uat_deploy
+      id: prod_deploy
       run: "helm upgrade --install catalogue -f values-dev.yaml -n roboshop --set deployment.imageVersion=${appVersion} --atomic --wait --timeout=5m ."
 
     - name: Update Deploy status
@@ -85,6 +86,6 @@ jobs:
       uses: nihu-ci/usable-workflow/.github/actions@main
       with:
           sha: ${{ inputs.version }}
-          state: ${{ steps.uat_deploy.outcome }}     # success / failure / cancelled
-          context: UAT_DEPLOY
-          description: ${{ steps.uat_deploy.outcome }}
+          state: ${{ steps.prod_deploy.outcome }}     # success / failure / cancelled
+          context: PROD_DEPLOY
+          description: ${{ steps.prod_deploy.outcome }}
