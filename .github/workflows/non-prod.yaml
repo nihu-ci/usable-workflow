@@ -20,9 +20,9 @@ jobs:
         echo "appVersion=$appVersion" >> $GITHUB_ENV
 
     - name: Check required commit statuses
-        id: gate
-        shell: bash
-        run: |
+      id: gate
+      shell: bash
+      run: |
           echo "🔍 Checking commit statuses for ${{ inputs.version }}"
 
           REQUIRED_CONTEXTS=(
