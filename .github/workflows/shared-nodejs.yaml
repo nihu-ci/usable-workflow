@@ -20,9 +20,6 @@ env:
 jobs:
   nodejs:  # name of the job
     runs-on: nodejs  #the workflow runs on nodejs runner
-    permissions:  # Controls what GITHUB token allowed to do for the job
-     contents: read
-     statuses: write
     steps:
     - name: Get code  #git clone the current repo
       uses: actions/checkout@v7
@@ -101,7 +98,7 @@ jobs:
             aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
             aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
             aws-region: us-east-1
-            
+
     - name: push image
       run: |
         aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${acc_id}.dkr.ecr.us-east-1.amazonaws.com
