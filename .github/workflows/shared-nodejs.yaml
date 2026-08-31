@@ -76,7 +76,7 @@ jobs:
           --pkg-types os \
           --exit-code 1 \
           --format table \
-          ${ACC_ID}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.project }}/${{ inputs.component }}:$appVersion
+          ${acc_id}.dkr.ecr.us-east-1.amazonaws.com/${{ inputs.project }}/${{ inputs.component }}:$appVersion
         TRIVY_RESULT=$?
 
         if [ "$TRIVY_RESULT" -ne 0 ]; then
